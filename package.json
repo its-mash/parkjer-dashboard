@@ -3,17 +3,32 @@
   "version": "1.2.0",
   "description": "Bootstrap 4 Web App UI Kit with AngularJS",
   "scripts": {
-    "start": "node node_modules/http-server/bin/http-server -o"
+    "start": "node node_modules/http-server/bin/http-server -o",
+    "build": "NODE_ENV=production webpack --progress"
   },
   "keywords": [],
   "repository": "https://gitlab.com/Heyflat/flatkit.git",
   "author": "Flatfull",
   "license": "Envato REGULAR LICENSE",
-  "dependencies": {},
+  "dependencies": {
+    "angular": "^1.8.0",
+    "angular1-apollo": "^0.3.0",
+    "apollo-cache-inmemory": "^1.6.6",
+    "apollo-client": "^2.6.10",
+    "apollo-link-http": "^1.5.17",
+    "graphql": "^15.2.0",
+    "graphql-tag": "^2.10.3"
+  },
   "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.1.0",
+    "babel-preset-es2015": "^6.24.1",
     "grunt": "^0.4.5",
-    "grunt-assemble": "^0.4.0",
-    "grunt-bump": "0.0.15",
+    "grunt-assemble": "^0.6.3",
+    "grunt-bump": "^0.8.0",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-copy": "^0.5.0",
@@ -24,6 +39,8 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-sass": "^1.0.0",
     "grunt-usemin": "^3.1.1",
-    "http-server": "^0.6.1"
+    "http-server": "^0.12.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
   }
 }

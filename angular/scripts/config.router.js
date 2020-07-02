@@ -43,7 +43,7 @@
               templateUrl: dashboard,
               data : { title: 'Dashboard' },
               controller: "ChartCtrl",
-              resolve: load(['scripts/controllers/chart.js'])
+              resolve: load(['angular/wscripts/controllers/chart.js'])
             })
 
             // applications

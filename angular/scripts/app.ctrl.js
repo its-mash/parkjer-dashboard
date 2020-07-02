@@ -20,7 +20,7 @@
         vm.isSmart = isSmart();
         // config
         vm.app = {
-          name: 'Flatkit',
+          name: 'Parkjer',
           version: '1.2.0',
           // for chart colors
           color: {

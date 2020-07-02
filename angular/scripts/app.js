@@ -6,6 +6,9 @@
  *
  * Main module of the application.
  */
+
+import AngularApollo from 'angular1-apollo'
+
 (function() {
     'use strict';
     angular
@@ -20,6 +23,7 @@
         'ui.utils',
         'ui.load',
         'ui.jp',
-        'oc.lazyLoad'
+        'oc.lazyLoad',
+        'angular-apollo'
       ]);
 })();

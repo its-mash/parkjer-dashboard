@@ -1,12 +1,15 @@
-// code style: https://github.com/johnpapa/angular-styleguide 
+// // code style: https://github.com/johnpapa/angular-styleguide 
+import gql from 'graphql-tag';
 
 (function() {
     'use strict';
     angular
       .module('app')
       .controller('ChartCtrl', Chart);
+      
+      Chart.$inject =  ['$scope','apollo'];
 
-      function Chart($scope){
+      function Chart($scope,apollo){
         var vm = $scope;
         vm.p_p_1 = [{data: 70, label: 'Server'}, {data: 30, label: 'Client'}];
         vm.p_p_2 = [{data: 75, label: 'iPhone'}, {data: 20, label: 'iPad'}];
@@ -59,6 +62,22 @@
             210.32,
             325.42
           ]
+
+           apollo
+            .query({
+              query: gql`
+                query MyQuery {
+                  parking:parkings_aggregate {
+                    aggregate {
+                      count(columns: id)
+                    }
+                  }
+                }
+              `,
+            })
+            .then(result => {
+              console.log('got data', result);
+            });
       }
       
 })();
