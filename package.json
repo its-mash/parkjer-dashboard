@@ -17,7 +17,8 @@
     "apollo-client": "^2.6.10",
     "apollo-link-http": "^1.5.17",
     "graphql": "^15.2.0",
-    "graphql-tag": "^2.10.3"
+    "graphql-tag": "^2.10.3",
+    "moment": "^2.27.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",

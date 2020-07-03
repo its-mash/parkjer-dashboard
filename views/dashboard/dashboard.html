@@ -22,18 +22,18 @@
 		</div>
 	</div>
 </div>
-<div class="padding">
+<div ng-controller="ChartCtrl" class="padding">
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
 	        <div class="box p-a">
 	          <div class="pull-left m-r">
 	            <span class="w-48 rounded  {{app.setting.theme.accent}}">
-	              <i class="material-icons">&#xe151;</i>
+	              <i class="material-icons">&#xe227;</i>
 	            </span>
 	          </div>
 	          <div class="clear">
-	            <h4 class="m-0 text-lg _300"><a href>125 <span class="text-sm">Emails</span></a></h4>
-	            <small class="text-muted">6 new arrivals.</small>
+	            <h4 class="m-0 text-lg _300"><a href>{{transactionToday | number:2}} <span class="text-sm">RM</span></a></h4>
+	            <small class="text-muted">Transaction today</small>
 	          </div>
 	        </div>
 	    </div>
@@ -41,12 +41,12 @@
 	        <div class="box p-a">
 	          <div class="pull-left m-r">
 	            <span class="w-48 rounded {{app.setting.theme.primary}}">
-	              <i class="material-icons">&#xe54f;</i>
+	              <i class="material-icons">&#xe898;</i>
 	            </span>
 	          </div>
 	          <div class="clear">
-	            <h4 class="m-0 text-lg _300"><a href>40 <span class="text-sm">Projects</span></a></h4>
-	            <small class="text-muted">38 open.</small>
+	            <h4 class="m-0 text-lg _300"><a href>{{unlockedParking}} <span class="text-sm">Unlocked</span></a></h4>
+	            <small class="text-muted">Parkings</small>
 	          </div>
 	        </div>
 	    </div>
@@ -54,12 +54,12 @@
 	        <div class="box p-a">
 	          <div class="pull-left m-r">
 	            <span class="w-48 rounded {{app.setting.theme.warn}}">
-	              <i class="material-icons">&#xe8d3;</i>
+	              <i class="material-icons">&#xe897;</i>
 	            </span>
 	          </div>
 	          <div class="clear">
-	            <h4 class="m-0 text-lg _300"><a href>600 <span class="text-sm">Users</span></a></h4>
-	            <small class="text-muted">632 vips.</small>
+	            <h4 class="m-0 text-lg _300"><a href>{{lockedParking}} <span class="text-sm">Locked</span></a></h4>
+	            <small class="text-muted">Parkings</small>
 	          </div>
 	        </div>
 	    </div>
