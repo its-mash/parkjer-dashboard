@@ -2,17 +2,29 @@
     'use strict';
     angular
         .module('app')
-        .factory('AuthService', function ($http, Session,$auth,BACKENDAPI) {
+        .factory('AuthService', function ($http, Session,$auth, $localStorage,APP_ENV,$state) {
             var authService = {};
+
+            authService.currentUser=null
+
+            var currentUser=APP_ENV.APP_NAME+'-user'
+
+            if ( angular.isDefined($localStorage[currentUser]) ) {
+              authService.currentUser = $localStorage[currentUser];
+            } else {
+              $localStorage[currentUser] = authService.currentUser;
+            }
+
             authService.login = function (credentials) {
                 return $auth.login(credentials).then(function(res) {
                     console.log(res)
                     // If login is successful, redirect to the users state
                     // $state.go('users', {});
                     // roles=res.data.user.roles.map(role=>{return role.name})
-                    Session.create(res.data.user.roles)
+                    // Session.create(res.data.user.roles)
                     console.log("rolex",res.data.user.roles)
-                    return res.data.user;
+                    authService.setCurrentUser(res.data.user)
+                    // return res.data.user;
                 })
                 // return $http
                 // .post('/login', credentials)
@@ -29,11 +41,13 @@
             
             authService.isAuthorized = function (authorizedRoles) {
                 if (!angular.isArray(authorizedRoles)) {
-                authorizedRoles = [authorizedRoles];
+                    authorizedRoles = [authorizedRoles];
                 }
                 var exists=false;
-                console.log('session useroles',Session.userRoles)
-                Session.userRoles && Session.userRoles.forEach(role=>{
+                var userRoles =  authService.currentUser!=null ?authService.currentUser.roles :  ['guest']
+                console.log('isAUtho',authorizedRoles)
+                console.log('session useroles',userRoles)
+                userRoles.forEach(role=>{
                     exists=exists || authorizedRoles.indexOf(role) !== -1
                 })
                 console.log("exists",exists)
@@ -41,11 +55,20 @@
             };
 
             authService.logout=function(){
-                $http.get(BACKENDAPI.baseURL+'/logout')
+                $http.get(APP_ENV.API_URL+'/logout')
                 .then(function(res){
                     // console.log(res.data)
+                    authService.setCurrentUser(null)
                     $auth.logout()
+                    $state.go('access.signin', {});
                 })
+            }
+            authService.getCurrentUser=function(){
+                return authService.currentUser
+            }
+            authService.setCurrentUser=function(user){
+                $localStorage[currentUser] = user;
+                authService.currentUser=user
             }
             return authService;
         })

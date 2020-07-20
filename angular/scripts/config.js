@@ -39,30 +39,33 @@ const authLink = setContext((_, { headers }) => {
             viewer: 'viewer',
             guest: 'guest'
        })
-       .constant('BACKENDAPI',{
-           'baseURL':'http://epark.test/api/v1'
+       .constant('APP_ENV',{
+           'API_URL':'http://epark.test/api/v1',
+           'APP_NAME':'Parkjer'
        })
 
       .run(function ($rootScope, AUTH_EVENTS, AuthService,$state) {
-        $rootScope.$on('$stateChangeStart', function (event, next) {
-          var authorizedRoles = next.data.authorizedRoles;
-          if (!AuthService.isAuthorized(authorizedRoles)) {
-            event.preventDefault();
-            if (AuthService.isAuthenticated()) {
-              // user is not allowed
-              $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-              $state.go('access.signin', {});
-              console.log("authRoles",authorizedRoles)
-            } else {
-              // user is not logged in
-              alert("You don't have necessary permission")
-
-              $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+          $rootScope.$on('$stateChangeStart', function (event, next) {
+            var authorizedRoles = angular.isDefined(next.data)? next.data.authorizedRoles: 'guest';
+            console.log("route",next)
+            if (!AuthService.isAuthenticated()) {
+              if(authorizedRoles!='guest'){
+                event.preventDefault();
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                $state.go('access.signin', {});
+              }
             }
-          }
-        });
+            else if(!AuthService.isAuthorized(authorizedRoles)){
+              event.preventDefault();
+              if(next.route.name!='access.signin'){
+                alert("You don't have necessary permission")
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+              }
+
+            }
+          })
       })
-      .config((apolloProvider,$authProvider,BACKENDAPI) => {
+      .config((apolloProvider,$authProvider,APP_ENV) => {
         // const client = new ApolloClient({
         //     link: createHttpLink({
         //         uri: "http://localhost:8080/v1/graphql"
@@ -70,8 +73,9 @@ const authLink = setContext((_, { headers }) => {
         //     cache: new InMemoryCache(),
         // });
 
-        $authProvider.baseUrl = BACKENDAPI.baseURL;
+        $authProvider.baseUrl = APP_ENV.API_URL;
         $authProvider.loginUrl = '/authenticate';
+        $authProvider.storageType = 'sessionStorage';
         const client = new ApolloClient({
             link: authLink.concat(httpLink),
             cache: new InMemoryCache()
@@ -79,27 +83,5 @@ const authLink = setContext((_, { headers }) => {
         
         apolloProvider.defaultClient(client);
     });
-    // .config(function ($httpProvider) {
-    //   $httpProvider.interceptors.push([
-    //     '$injector',
-    //     function ($injector) {
-    //       return $injector.get('AuthInterceptor');
-    //     }
-    //   ]);
-    // })
-    // .factory('AuthInterceptor', function ($rootScope, $q,
-    //                                       AUTH_EVENTS) {
-    //   return {
-    //     responseError: function (response) { 
-    //       $rootScope.$broadcast({
-    //         401: AUTH_EVENTS.notAuthenticated,
-    //         403: AUTH_EVENTS.notAuthorized,
-    //         419: AUTH_EVENTS.sessionTimeout,
-    //         440: AUTH_EVENTS.sessionTimeout
-    //       }[response.status], response);
-    //       return $q.reject(response);
-    //     }
-    //   };
-    // });
 
 })();

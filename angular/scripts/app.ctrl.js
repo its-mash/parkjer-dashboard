@@ -12,27 +12,16 @@
       .module('app')
       .controller('AppCtrl', AppCtrl);
 
-      AppCtrl.$inject  = ['$scope', '$localStorage', '$location', '$rootScope', '$anchorScroll', '$timeout', '$window','USER_ROLES','AuthService'];
+      AppCtrl.$inject  = ['$scope', '$localStorage', '$location', '$rootScope', '$anchorScroll', '$timeout', '$window','USER_ROLES','AuthService','APP_ENV'];
 
-      function AppCtrl($scope, $localStorage, $location, $rootScope, $anchorScroll, $timeout, $window,USER_ROLES,AuthService) {
+      function AppCtrl($scope, $localStorage, $location, $rootScope, $anchorScroll, $timeout, $window,USER_ROLES,AuthService,APP_ENV) {
         var vm = $scope;
 
-
-        vm.currentUser = null;
-        vm.userRoles = USER_ROLES;
-        vm.isAuthorized = AuthService.isAuthorized;
-      
-        vm.setCurrentUser = function (user) {
-          vm.currentUser = user;
-        };
-
-
-        
         vm.isIE = isIE();
         vm.isSmart = isSmart();
         // config
         vm.app = {
-          name: 'Parkjer',
+          name: APP_ENV.APP_NAME,
           version: '1.2.0',
           // for chart colors
           color: {
@@ -73,6 +62,17 @@
         $scope.$watch('app.setting', function(){
           $localStorage[setting] = vm.app.setting;
         }, true);
+
+
+
+
+
+        vm.currentUser = AuthService.getCurrentUser;
+
+
+        vm.userRoles = USER_ROLES;
+        vm.isAuthorized = AuthService.isAuthorized;
+        vm.logout=AuthService.logout
 
         getParams('bg') && (vm.app.setting.bg = getParams('bg'));
 

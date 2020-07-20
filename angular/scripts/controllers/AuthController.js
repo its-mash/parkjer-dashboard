@@ -17,10 +17,10 @@
                 }
 
                 // Use Satellizer's $auth service to login
-                AuthService.login(credentials).then(function(user) {
+                AuthService.login(credentials).then(function() {
                     // console.log("authen suc")
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-                    $scope.setCurrentUser(user);
+                    // $scope.setCurrentUser(user);
                     // If login is successful, redirect to the users state
                     $state.go('app.dashboard', {});
                 }).catch(function (res) {
