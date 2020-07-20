@@ -15,10 +15,12 @@
     "angular1-apollo": "^0.3.0",
     "apollo-cache-inmemory": "^1.6.6",
     "apollo-client": "^2.6.10",
+    "apollo-link-context": "^1.0.20",
     "apollo-link-http": "^1.5.17",
     "graphql": "^15.2.0",
     "graphql-tag": "^2.10.3",
-    "moment": "^2.27.0"
+    "moment": "^2.27.0",
+    "satellizer": "^0.15.5"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",
@@ -27,6 +29,8 @@
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
     "babel-preset-es2015": "^6.24.1",
+    "dotenv": "^8.2.0",
+    "dotenv-webpack": "^2.0.0",
     "grunt": "^0.4.5",
     "grunt-assemble": "^0.6.3",
     "grunt-bump": "^0.8.0",

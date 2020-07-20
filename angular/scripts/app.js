@@ -24,6 +24,7 @@ import AngularApollo from 'angular1-apollo'
         'ui.load',
         'ui.jp',
         'oc.lazyLoad',
-        'angular-apollo'
+        'angular-apollo',
+        'satellizer'
       ]);
 })();

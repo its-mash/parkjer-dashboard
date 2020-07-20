@@ -1,5 +1,7 @@
 const path = require('path');
-
+const dotenv = require('dotenv').config( {
+  path: path.join(__dirname, '.env')
+} );
 
 module.exports = {
   mode:"development",
@@ -29,6 +31,11 @@ module.exports = {
   optimization: {
       minimize: false
   },
-  watch: true
+  watch: true,
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': dotenv.parsed
+    })
+  ]
 
 }

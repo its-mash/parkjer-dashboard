@@ -12,10 +12,22 @@
       .module('app')
       .controller('AppCtrl', AppCtrl);
 
-      AppCtrl.$inject  = ['$scope', '$localStorage', '$location', '$rootScope', '$anchorScroll', '$timeout', '$window'];
+      AppCtrl.$inject  = ['$scope', '$localStorage', '$location', '$rootScope', '$anchorScroll', '$timeout', '$window','USER_ROLES','AuthService'];
 
-      function AppCtrl($scope, $localStorage, $location, $rootScope, $anchorScroll, $timeout, $window) {
+      function AppCtrl($scope, $localStorage, $location, $rootScope, $anchorScroll, $timeout, $window,USER_ROLES,AuthService) {
         var vm = $scope;
+
+
+        vm.currentUser = null;
+        vm.userRoles = USER_ROLES;
+        vm.isAuthorized = AuthService.isAuthorized;
+      
+        vm.setCurrentUser = function (user) {
+          vm.currentUser = user;
+        };
+
+
+        
         vm.isIE = isIE();
         vm.isSmart = isSmart();
         // config

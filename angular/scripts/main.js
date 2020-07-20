@@ -16,3 +16,11 @@ import './filters/fromnow'
 import './services/ngstore'
 import './services/ui-load'
 import './services/palette'
+import './services/satellizer.min'
+import './services/SessionService'
+import './services/AuthService'
+import './controllers/AuthController'
+
+
+// window.envVariables = process.env;
+// console.log(process.env.API_END_POINT)

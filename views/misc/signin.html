@@ -10,24 +10,35 @@
       </div>
       <form name="form">
         <div class="md-form-group float-label">
-          <input type="email" class="md-input" ng-model="user.email" required>
+          <input type="email" class="md-input" ng-model="auth.email" required>
           <label>Email</label>
         </div>
         <div class="md-form-group float-label">
-          <input type="password" class="md-input" ng-model="user.password" required>
+          <input type="password" class="md-input" ng-model="auth.password" required>
           <label>Password</label>
         </div>      
-        <div class="m-b-md">        
+        <!-- <div class="m-b-md">        
           <label class="md-check">
             <input type="checkbox"><i class="primary"></i> Keep me signed in
           </label>
-        </div>
-        <button type="submit" class="btn primary btn-block p-x-md">Sign in</button>
+        </div> -->
+        <button type="submit" class="btn primary btn-block p-x-md" ng-click="auth.login()">Sign in</button>
       </form>
     </div>
 
-    <div class="p-v-lg text-center">
+    <!-- <div class="p-v-lg text-center">
       <div class="m-b"><a ui-sref="access.forgot-password" href="forgot-password.html" class="text-primary _600">Forgot password?</a></div>
       <div>Do not have an account? <a ui-sref="access.signup" href="signup.html" class="text-primary _600">Sign up</a></div>
-    </div>
+    </div> -->
   </div>
+  {{auth.isAuthenticated()}}
+
+        <button type="logout" class="btn primary btn-block p-x-md" ng-click="auth.logout()">Sign in</button>
+
+        <div ng-if="currentUser">Welcome, {{ currentUser.name }}</div>
+<div ng-if="isAuthorized(userRoles.admin)">You're admin.</div>
+<div ng-switch on="currentUser.role">
+  <div ng-switch-when="userRoles.admin">You're admin.</div>
+  <div ng-switch-when="userRoles.editor">You're editor.</div>
+  <div ng-switch-default>You're something else.</div>
+</div>

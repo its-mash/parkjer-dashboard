@@ -100,11 +100,11 @@ import moment from 'moment';
         }
       })
         .then(result => {
-          console.log('got data', result);
+          // console.log('got data', result);
           vm.transactionToday=result.data.payment.aggregate.sum.amount?result.data.payment.aggregate.sum.amount:0
           vm.lockedParking=result.data.transaction.aggregate.count
           vm.unlockedParking=result.data.parking.aggregate.count-vm.lockedParking
-          console.log()
+          // console.log()
         });
     }, 2000)
 

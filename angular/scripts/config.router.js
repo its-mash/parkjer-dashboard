@@ -18,8 +18,8 @@
           $rootScope.$stateParams = $stateParams;        
       }
 
-      config.$inject =  ['$stateProvider', '$urlRouterProvider', 'MODULE_CONFIG'];
-      function config( $stateProvider,   $urlRouterProvider,   MODULE_CONFIG ) {
+      config.$inject =  ['$stateProvider', '$urlRouterProvider', 'MODULE_CONFIG','USER_ROLES'];
+      function config( $stateProvider,   $urlRouterProvider,   MODULE_CONFIG, USER_ROLES ) {
         
         var p = getParams('layout'),
             l = p ? p + '.' : '',
@@ -36,6 +36,9 @@
               '': {
                 templateUrl: layout
               }
+            },
+            data: {
+              authorizedRoles: [USER_ROLES.admin, USER_ROLES.viewer]
             }
           })
             .state('app.dashboard', {
@@ -43,7 +46,10 @@
               templateUrl: dashboard,
               data : { title: 'Dashboard' },
               controller: "ChartCtrl",
-              resolve: load(['angular/wscripts/controllers/chart.js'])
+              resolve: load(['angular/wscripts/controllers/chart.js']),
+              data: {
+                authorizedRoles: [USER_ROLES.admin, USER_ROLES.viewer]
+              }
             })
 
             // applications
@@ -487,7 +493,8 @@
             })
             .state('access.signin', {
               url: '/signin',
-              templateUrl: '../views/misc/signin.html'
+              templateUrl: '../views/misc/signin.html',
+              controller:'AuthController as auth'
             })
             .state('access.signup', {
               url: '/signup',
