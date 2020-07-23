@@ -65,13 +65,13 @@
 	    </div>
 	</div>
 	<div class="row">
-		<div class="col-sm-6 col-md-4">
+		<div class="col-sm-12 col-md-12">
 	        <div class="box">
 	          <div class="box-header">
-	            <h3>Projects monitor</h3>
-	            <small>Calculated in last 30 days</small>
+	            <h2>Transactions monitor</h2>
+	            <!-- <small>Calculated in last 30 days</small> -->
 	          </div>
-	          <div class="box-tool">
+	          <!-- <div class="box-tool">
 		        <ul class="nav">
 		          <li class="nav-item inline">
 		            <a class="nav-link">
@@ -91,9 +91,9 @@
 		            </div>
 		          </li>
 		        </ul>
-		      </div>
+		      </div> -->
 	          <div class="box-body">
-	          	<div class="text-center m-b">
+	          	<!-- <div class="text-center m-b">
 	          		<div class="btn-group" data-toggle="buttons">
 					  <label class="btn btn-sm white">
 					    <input type="radio" name="options" autocomplete="off"> Month
@@ -102,8 +102,10 @@
 					    <input type="radio" name="options" autocomplete="off"> Day
 					  </label>
 					</div>
-	          	</div>
-	            <div ui-jp="plot" ui-refresh="app.setting.color" ui-options="
+				</div> -->
+				<div id="chartSellStats"></div>
+
+	            <!-- <div ui-jp="plot" ui-refresh="app.setting.color" ui-options="
 	              [
 	                { data: {{p_l_5}}, 
 	                  points: { show: true, radius: 0}, 
@@ -128,11 +130,11 @@
 	                tooltipOpts: { content: '%x.0 is %y.4',  defaultTheme: false, shifts: { x: 0, y: -40 } }
 	              }
 	            " style="height:188px" >
-	            </div>
+	            </div> -->
 	          </div>
 	        </div>
 	    </div>
-	    <div class="col-sm-6 col-md-4">
+	    <!-- <div class="col-sm-6 col-md-4">
 	        <div class="box">
 	          <div class="box-header">
 	            <h3>Tasks</h3>
@@ -188,8 +190,8 @@
 	            </div>
 	          </div>
 	        </div>
-	    </div>
-	    <div class="col-sm-12 col-md-4">
+	    </div> -->
+	    <!-- <div class="col-sm-12 col-md-4">
 	    	<div class="box">
 	          <div class="box-header">
 	            <h3>Sales</h3>
@@ -245,7 +247,7 @@
 	            </div>
 	          </div>
 	        </div>
-	    </div>
+	    </div> -->
 	</div>
 	<div class="row">
 	    <div class="col-sm-12 col-md-6">

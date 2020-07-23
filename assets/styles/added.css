@@ -1,0 +1,13 @@
+#chartSellStats {
+  width: 100%;
+  height: 400px;
+}
+
+.box-header{
+    text-align: center;
+    padding-bottom: 0;
+}
+
+.box-body{
+    padding-top: 0;
+}
