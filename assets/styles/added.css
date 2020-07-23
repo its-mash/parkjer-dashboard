@@ -11,3 +11,7 @@
 .box-body{
     padding-top: 0;
 }
+
+.ui-draggable, .ui-droppable {
+	background-position: top;
+}

@@ -28,12 +28,27 @@
   <!-- endbuild -->
   <link rel="stylesheet" href="../assets/styles/font.css" type="text/css" />
   <link rel="stylesheet" href="../assets/styles/added.css" type="text/css" />
+
+  <!-- jquery ui -->
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angularjs-slider/7.0.0/rzslider.min.css" type="text/css" />
+  
+
+
+
 </head>
 <body ng-app="app" ng-controller="AppCtrl" class="{{app.setting.bg}}" ng-class="{'container': app.setting.boxed, 'ie': isIE,'smart': isSmart}">
-  <div class="app" ui-view></div>
+
 <!-- build:js scripts/app.angular.js -->
 <!-- jQuery -->
+  <!-- <script
+  src="https://code.jquery.com/jquery-2.2.4.min.js"
+  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+  crossorigin="anonymous"></script> -->
+  <!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> -->
+
   <script src="../libs/jquery/jquery/dist/jquery.js"></script>
+  <!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
 <!-- Bootstrap -->
   <script src="../libs/jquery/tether/dist/js/tether.min.js"></script>
   <script src="../libs/jquery/bootstrap/dist/js/bootstrap.js"></script>
@@ -79,5 +94,16 @@
   <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
   <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
   <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+
+
+
+  <!-- slider -->
+  <!-- <link rel="stylesheet" href="/resources/demos/style.css"> -->
+  <!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-slider/7.0.0/rzslider.min.js"></script>
+  
+
+  
+  <div class="app" ui-view></div>
 </body>
 </html>

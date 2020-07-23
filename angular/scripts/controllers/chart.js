@@ -11,10 +11,38 @@ import moment from 'moment';
     .module('app')
     .controller('ChartCtrl', Chart);
 
-  Chart.$inject = ['$scope', 'apollo', '$interval'];
+  Chart.$inject = ['$scope', 'apollo', '$interval','$timeout'];
 
-  function Chart($scope, apollo, $interval) {
+  function Chart($scope, apollo, $interval,$timeout) {
     var vm = $scope;
+// slider
+
+    $scope.sliderVisible = false;
+
+    vm.slider = {
+      minValue: 1,
+      maxValue: 200,
+      options: {
+        floor: 1,
+        ceil: 200,
+        noSwitching: true,
+        translate: function(value, sliderId, label) {
+          
+            return value + " hrs"
+  
+        }
+      }
+    };
+    $scope.toggleSlider = function () {
+      console.log("slider")
+      $scope.sliderVisible = !$scope.sliderVisible;
+      $timeout(function () {
+        $scope.$broadcast('rzSliderForceRender');
+      });
+    };
+
+
+
     vm.p_p_1 = [{ data: 70, label: 'Server' }, { data: 30, label: 'Client' }];
     vm.p_p_2 = [{ data: 75, label: 'iPhone' }, { data: 20, label: 'iPad' }];
     vm.p_p_3 = [{ data: 30, label: 'Server' }, { data: 70, label: 'Client' }];

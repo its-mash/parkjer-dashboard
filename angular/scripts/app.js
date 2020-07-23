@@ -25,6 +25,7 @@ import AngularApollo from 'angular1-apollo'
         'ui.jp',
         'oc.lazyLoad',
         'angular-apollo',
-        'satellizer'
+        'satellizer',
+        'rzSlider'
       ]);
 })();

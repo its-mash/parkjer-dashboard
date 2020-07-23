@@ -2,7 +2,7 @@
 	<div class="row">
 		<div class="col-sm-6">
 			<h4 class="mb-0 _300">Welcome to {{app.name}}</h4>
-			<small class="text-muted">Bootstrap <strong>4</strong> Web App Kit with AngularJS</small>
+			<!-- <small class="text-muted">Bootstrap <strong>4</strong> Web App Kit with AngularJS</small> -->
 		</div>
 		<div class="col-sm-6 text-sm-right">
 			<div class="m-y-sm">
@@ -22,7 +22,44 @@
 		</div>
 	</div>
 </div>
-<div ng-controller="ChartCtrl" class="padding">
+
+
+<div ng-controller="ChartCtrl" class="padding pt-2">
+	<div class="row pb-2 ">
+		<div class="col">
+			<p class="text-center m-auto">
+				<a class="" data-toggle="collapse" ng-click="toggleSlider()" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+					Filters
+					<span class="material-icons">expand_more</span>
+				</a>
+				<!-- <button ng-click="toggleSlider()" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+					<span class="material-icons">expand_more</span>
+				</button> -->
+			</p>
+			<div class="collapse box mb-3 mt-2" id="collapseExample">
+				<div class="p-2">
+					<div class="row mb-3">
+						<div class="col-4 d-inline-flex align-items-center justify-content-end h6">Daily total parking hours</div>
+						<div class="col-6 pr-5">
+							<div ng-show="sliderVisible">
+								<rzslider rz-slider-model="slider.minValue" rz-slider-high="slider.maxValue" rz-slider-options="slider.options"></rzslider>
+							</div>	
+						</div>
+						<!-- <div class="col-2"></div> -->
+					</div>
+					<div class="row">
+						<div class="col-4 d-inline-flex align-items-center justify-content-end h6">Areas to include or empty for all </div>
+						<div class="col-6 pr-5">
+							<div class="form-group green-border-focus">
+								<!-- <label for="exampleFormControlTextarea5">Colorful border on :focus state</label> -->
+								<textarea ng-model="areas" class="form-control" id="exampleFormControlTextarea5" rows="3"></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
 	        <div class="box p-a">
