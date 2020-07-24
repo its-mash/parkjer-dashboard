@@ -3,7 +3,73 @@ import gql from 'graphql-tag';
 import moment from 'moment';
 
 
+function syncToLocalStorage(key,varr,vm,$localStorage){
 
+    // save settings to local storage
+    if ( angular.isDefined($localStorage[key]) ) {
+      vm[varr] = $localStorage[key];
+      console.log("areas",vm[varr])
+    } else {
+      $localStorage[key] = vm[varr];
+    }
+}
+
+function refreshStats(vm,apollo){
+    var sellstats_args={
+    }
+
+
+    if (vm.filters.areas.length != 0) {
+      sellstats_args._areas = vm.filters.areas.join('|')
+    }
+    // $interval(function () {
+    apollo.query({
+        query: gql`
+                  query MyQuery($_today: date,$_sellstats_args: sellstats_args!) {
+                    transaction: transactions_aggregate {
+                      aggregate {
+                        count(columns: categories_applied)
+                      }
+                    }
+                    parking: parkings_aggregate {
+                      aggregate {
+                        count(columns: id)
+                      }
+                    }
+                    payment: payments_aggregate(where: {created_at: {_eq: $_today}}) {
+                      aggregate {
+                        sum {
+                          amount: amount_paid
+                        }
+                      }
+                    }
+                    sellstats(args:$_sellstats_args) {
+                      amount
+                      duration
+                      transactionDate
+                    }
+                    parkings {
+                      name: area_name
+                    }
+                  }
+                `,
+        variables:{
+          "_today": moment().format("YYYY-MM-DD"),
+          "_sellstats_args":sellstats_args
+        }
+      })
+      .then(result => {
+          console.log('got data', result);
+          vm.transactionToday=result.data.payment.aggregate.sum.amount?result.data.payment.aggregate.sum.amount:0
+          vm.lockedParking=result.data.transaction.aggregate.count
+          vm.unlockedParking=result.data.parking.aggregate.count-vm.lockedParking
+          // console.log()
+          vm.areaOptions=result.data.parkings
+          console.log(vm.areaOptions)
+        });
+    // }, 5000)
+
+}
 
 (function () {
   'use strict';
@@ -11,35 +77,155 @@ import moment from 'moment';
     .module('app')
     .controller('ChartCtrl', Chart);
 
-  Chart.$inject = ['$scope', 'apollo', '$interval','$timeout'];
+  Chart.$inject = ['$scope', 'apollo', '$interval','$timeout','APP_ENV','$localStorage'];
 
-  function Chart($scope, apollo, $interval,$timeout) {
+  function Chart($scope, apollo, $interval,$timeout,APP_ENV,$localStorage) {
     var vm = $scope;
+
+
+    vm.slider={
+        options: {
+          floor: 1,
+          ceil: 200,
+          noSwitching: true,
+          translate: function(value, sliderId, label) {
+            
+              return value + " hrs"
+    
+          }
+        }
+    }
+
+    vm.filters={
+      slider:{
+        minValue: 1,
+        maxValue: 200
+      },
+      areas:[
+
+      ]
+    }
+
+    var filters=APP_ENV.NAME+'-filters'
+    syncToLocalStorage(filters,'filters',vm,$localStorage)
+    
+    $scope.$watch('filters', function(){
+      $localStorage[filters] = vm.filters;
+    }, true);
 // slider
 
     $scope.sliderVisible = false;
 
-    vm.slider = {
-      minValue: 1,
-      maxValue: 200,
-      options: {
-        floor: 1,
-        ceil: 200,
-        noSwitching: true,
-        translate: function(value, sliderId, label) {
+    // vm.slider = {
+    //   minValue: 1,
+    //   maxValue: 200,
+    //   options: {
+    //     floor: 1,
+    //     ceil: 200,
+    //     noSwitching: true,
+    //     translate: function(value, sliderId, label) {
           
-            return value + " hrs"
+    //         return value + " hrs"
   
-        }
-      }
-    };
+    //     }
+    //   }
+    // };
     $scope.toggleSlider = function () {
-      console.log("slider")
+      // console.log("slider")
       $scope.sliderVisible = !$scope.sliderVisible;
       $timeout(function () {
         $scope.$broadcast('rzSliderForceRender');
       });
     };
+
+  // location filter
+    // var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
+    //                   '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
+
+    // vm.areas=[];
+    // var areas = APP_ENV.APP_NAME+'-areas';
+    // // save settings to local storage
+    // if ( angular.isDefined($localStorage[areas]) ) {
+    //   vm.areas = $localStorage[areas];
+    //   // console.log("areas",vm.areas)
+    // } else {
+    //   $localStorage[areas] = vm.areas;
+    // }
+
+    // vm.areas=[]
+    // var areas = APP_ENV.APP_NAME+'-areas';
+    // syncToLocalStorage(areas,'areas',vm,$localStorage)
+    // watch changes
+    // $scope.$watch('areas', function(){
+    //   $localStorage[areas] = vm.areas;
+    // }, true);
+
+    vm.transactionToday = 0;
+    vm.unlockedParking = 0;
+    vm.lockedParking = 0;
+    vm.areaOptions=[]
+
+
+    refreshStats(vm,apollo)
+
+    console.log("areas_c",vm.filters)
+
+
+    $('#select-to').selectize({
+        plugins: ['remove_button'],
+        persist: false,
+        maxItems: null,
+        valueField: 'name',
+        labelField: 'name',
+        searchField: ['name'],
+        placeholder:"Enter Area name one by one",
+        items:   vm.filters.areas,
+        options: vm.areaOptions,
+        render: {
+            item: function(item, escape) {
+                return '<div>' +
+                    (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '')+
+                '</div>';
+            },
+            option: function(item, escape) {
+                var label = item.name;
+                return '<div>' +
+                    '<span class="label">' + escape(label) + '</span>' +
+                '</div>';
+            }
+        },
+        createFilter: function(input) {
+            var match, regex;
+
+            // email@address.com
+            regex = new RegExp('^' + input + '$', 'i');
+            match = input.match(regex);
+            if (match) return !this.options.hasOwnProperty(match[0]);
+
+            // name <email@address.com>
+            // regex = new RegExp('^([^<]*)\<' + REGEX_EMAIL + '\>$', 'i');
+            // match = input.match(regex);
+            // if (match) return !this.options.hasOwnProperty(match[2]);
+
+            return false;
+        },
+        onChange: function(value){
+          // $localStorage[areas] = value;
+          console.log("value",value)
+          vm.filters.areas=value;
+          // $localStorage[filters]=vm.filters
+          console.log(vm.filters)
+          console.log("vm areas",vm.filters.areas)
+          console.log("st areas",$localStorage[filters])
+              // var filters=APP_ENV.NAME+'-filters'
+          syncToLocalStorage(filters,'filters',vm,$localStorage)
+        },
+        preload:"focus",
+        load: function(query, callback){
+          callback(vm.areaOptions)
+        }
+    });
+  // end location filter
 
 
 
@@ -95,46 +281,7 @@ import moment from 'moment';
       325.42
     ]
 
-    vm.transactionToday = 0;
-    vm.unlockedParking = 0;
-    vm.lockedParking = 0;
 
-    $interval(function () {
-      apollo.query({
-        query: gql`
-                  query MyQuery($_today: date) {
-                    transaction:transactions_aggregate {
-                      aggregate {
-                        count(columns: categories_applied)
-                      }
-                    }
-                    parking: parkings_aggregate {
-                      aggregate {
-                        count(columns: id)
-                      }
-                    }
-                    payment: payments_aggregate(where: {created_at: {_eq: $_today}}) {
-                      aggregate {
-                        sum {
-                          amount: amount_paid
-                        }
-                      }
-                    }
-                  }
-                `,
-        variables:{
-          "_today": moment().format("YYYY-MM-DD")
-          
-        }
-      })
-      .then(result => {
-          // console.log('got data', result);
-          vm.transactionToday=result.data.payment.aggregate.sum.amount?result.data.payment.aggregate.sum.amount:0
-          vm.lockedParking=result.data.transaction.aggregate.count
-          vm.unlockedParking=result.data.parking.aggregate.count-vm.lockedParking
-          // console.log()
-        });
-    }, 2000)
 
 
 

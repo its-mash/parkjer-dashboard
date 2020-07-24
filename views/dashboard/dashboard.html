@@ -39,20 +39,25 @@
 			<div class="collapse box mb-3 mt-2" id="collapseExample">
 				<div class="p-2">
 					<div class="row mb-3">
-						<div class="col-4 d-inline-flex align-items-center justify-content-end h6">Daily total parking hours</div>
+						<div class="col-4 d-inline-flex align-items-center justify-content-end">
+							<label for="">Daily total parking hours</label>	
+						</div>
 						<div class="col-6 pr-5">
 							<div ng-show="sliderVisible">
-								<rzslider rz-slider-model="slider.minValue" rz-slider-high="slider.maxValue" rz-slider-options="slider.options"></rzslider>
+								<rzslider rz-slider-model="filters.slider.minValue" rz-slider-high="filters.slider.maxValue" rz-slider-options="slider.options"></rzslider>
 							</div>	
 						</div>
 						<!-- <div class="col-2"></div> -->
 					</div>
 					<div class="row">
-						<div class="col-4 d-inline-flex align-items-center justify-content-end h6">Areas to include or empty for all </div>
+						<div class="col-4 d-inline-flex align-items-center justify-content-end h6">
+							<label for="">Areas to include or empty for all </label>
+						</div>
 						<div class="col-6 pr-5">
 							<div class="form-group green-border-focus">
 								<!-- <label for="exampleFormControlTextarea5">Colorful border on :focus state</label> -->
-								<textarea ng-model="areas" class="form-control" id="exampleFormControlTextarea5" rows="3"></textarea>
+								<!-- <textarea ng-model="areas" class="form-control" id="exampleFormControlTextarea5" rows="3"></textarea> -->
+								<select id="select-to" class="contacts selectized" multiple="multiple" tabindex="-1" style="display: none;"></select>
 							</div>
 						</div>
 					</div>
