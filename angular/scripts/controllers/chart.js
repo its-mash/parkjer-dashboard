@@ -11,9 +11,10 @@ import moment from 'moment';
     .module('app')
     .controller('ChartCtrl', Chart);
 
-  Chart.$inject = ['$scope', 'apollo', '$interval','$timeout','APP_ENV','$localStorage','$q'];
+  Chart.$inject = ['$scope', 'apollo', '$interval','$timeout','APP_ENV','$localStorage','$q',"AuthService"];
 
-  function Chart($scope, apollo, $interval,$timeout,APP_ENV,$localStorage,$q) {
+  function Chart($scope, apollo, $interval,$timeout,APP_ENV,$localStorage,$q,AuthService) {
+    console.log("Session",AuthService.getCurrentUser().token)
     var vm = $scope;
    
     vm.filters={
@@ -53,8 +54,8 @@ import moment from 'moment';
     $scope.$watch("sliderVisible", function(oldValue,newValue){
       if(!vm.sliderVisible){
         $localStorage[filters] = vm.filters;
-        console.log("watch loc",$localStorage[filters].areas)
-        console.log("watch vm",vm.filters.areas)
+        // console.log("watch loc",$localStorage[filters].areas)
+        console.log("watch vm",vm.filters)
       }
       vm.applyFilter()
     });
@@ -88,7 +89,7 @@ import moment from 'moment';
           _graphQL_args._areas= vm.filters.areas
         }
         // $interval(function () {
-
+        console.log("gragr",_graphQL_args)
 
         apollo.query({
             query: gql`
@@ -120,7 +121,12 @@ import moment from 'moment';
                         }
                       }
                     `,
-            variables:_graphQL_args
+            variables:_graphQL_args,
+            context:{
+              headers:{
+                "Authorization": AuthService.getCurrentUser().token
+              }
+            }
           })
           .then(result => {
               console.log('got data', result.data);
@@ -130,7 +136,7 @@ import moment from 'moment';
               // console.log()
               vm.areaOptions=result.data.parkings;
               vm.sellStats=result.data.sellstats;
-              console.log(vm.areaOptions)
+              // console.log(vm.areaOptions)
               resolve()
             });
         // }, 5000)
@@ -235,6 +241,8 @@ import moment from 'moment';
               var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
               dateAxis.renderer.minGridDistance = 50;
               dateAxis.baseInterval={ timeUnit: "day", count: 1 };
+              dateAxis.groupData = true;
+
               var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
 
               // Create series
@@ -244,7 +252,7 @@ import moment from 'moment';
               series.strokeWidth = 2;
               series.minBulletDistance = 10;
               series.tooltipText = `{valueY} RM
-              Duration:{duration}`;
+              Duration:{duration} hrs`;
               series.tooltip.pointerOrientation = "vertical";
               series.tooltip.background.cornerRadius = 20;
               series.tooltip.background.fillOpacity = 0.5;
@@ -260,7 +268,7 @@ import moment from 'moment';
               chart.cursor.snapToSeries = series;
 
               function generateChartData() {
-                  console.log("am4",vm.sellStats)
+                  // console.log("am4",vm.sellStats)
                   var chartData = [];
 
                   vm.sellStats.forEach(

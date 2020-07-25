@@ -15,14 +15,17 @@
               $localStorage[currentUser] = authService.currentUser;
             }
 
+            // console.log("current user",authService.currentUser)
+
             authService.login = function (credentials) {
                 return $auth.login(credentials).then(function(res) {
-                    console.log(res)
+                    // console.log(res.data)
                     // If login is successful, redirect to the users state
                     // $state.go('users', {});
                     // roles=res.data.user.roles.map(role=>{return role.name})
-                    // Session.create(res.data.user.roles)
-                    console.log("rolex",res.data.user.roles)
+                    // Session.create(res.data.user.id, res.data.token)
+                    // console.log("User",res.data.user)
+                    res.data.user.token=res.data.token
                     authService.setCurrentUser(res.data.user)
                     // return res.data.user;
                 })
@@ -58,6 +61,7 @@
                 $http.get(APP_ENV.API_URL+'/logout')
                 .then(function(res){
                     // console.log(res.data)
+                    // Session.destroy()
                     authService.setCurrentUser(null)
                     $auth.logout()
                     $state.go('access.signin', {});

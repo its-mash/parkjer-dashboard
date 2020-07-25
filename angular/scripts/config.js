@@ -6,18 +6,6 @@ import { createHttpLink } from 'apollo-link-http';
 import { setContext } from "apollo-link-context";
 
 
-const httpLink = createHttpLink({
-  uri: 'http://localhost:8080/v1/graphql',
-});
-
-const authLink = setContext((_, { headers }) => {
-  return {
-    headers: {
-      ...headers,
-      'x-hasura-admin-secret':'myadminsecretkey'
-    }
-  }
-});
 
 
 
@@ -72,7 +60,18 @@ const authLink = setContext((_, { headers }) => {
         //     }),
         //     cache: new InMemoryCache(),
         // });
+        const httpLink = createHttpLink({
+          uri: 'http://localhost:8080/v1/graphql',
+        });
 
+        const authLink = setContext((_, { headers }) => {
+          return {
+            headers: {
+              ...headers
+            }
+          }
+        });
+              // 'x-hasura-admin-secret':'myadminsecretkey'
         $authProvider.baseUrl = APP_ENV.API_URL;
         $authProvider.loginUrl = '/authenticate';
         $authProvider.storageType = 'sessionStorage';
