@@ -56,8 +56,8 @@ import moment from 'moment';
         $localStorage[filters] = vm.filters;
         // console.log("watch loc",$localStorage[filters].areas)
         console.log("watch vm",vm.filters)
+        vm.applyFilter()
       }
-      vm.applyFilter()
     });
     
     function syncToLocalStorage(key,varr){
@@ -282,6 +282,9 @@ import moment from 'moment';
                   )
                   return chartData;
               }
+              chart.events.on("beforedatavalidated", function(ev) {
+                ev.target.data = generateChartData();
+              });
 
             }); 
 
@@ -293,7 +296,10 @@ import moment from 'moment';
     vm.applyFilter=function(){
       console.log("applying filter")
       refreshStats().then(function(){
-        chart.validateData()
+        console.log("vm data",vm.sellStats)
+        // chart.dataLoader.loadData()
+        chart.invalidateData()
+        // chart.validateData()
         console.log("data validated")
       })
     }
