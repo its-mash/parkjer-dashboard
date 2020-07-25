@@ -22,7 +22,7 @@
             <input type="checkbox"><i class="primary"></i> Keep me signed in
           </label>
         </div> -->
-        <button type="submit" class="btn primary btn-block p-x-md" ng-click="auth.login()">Sign in</button>
+        <button type="submit" class="btn primary btn-block p-x-md" ng-click="auth.login()">{{auth.isProcessing?"Processing":"Sign in"}}</button>
       </form>
     </div>
 
@@ -31,14 +31,3 @@
       <div>Do not have an account? <a ui-sref="access.signup" href="signup.html" class="text-primary _600">Sign up</a></div>
     </div> -->
   </div>
-  {{auth.isAuthenticated()}}
-
-        <button type="logout" class="btn primary btn-block p-x-md" ng-click="auth.logout()">Sign in</button>
-
-        <div ng-if="currentUser">Welcome, {{ currentUser.name }}</div>
-<div ng-if="isAuthorized(userRoles.admin)">You're admin.</div>
-<div ng-switch on="currentUser.role">
-  <div ng-switch-when="userRoles.admin">You're admin.</div>
-  <div ng-switch-when="userRoles.editor">You're editor.</div>
-  <div ng-switch-default>You're something else.</div>
-</div>

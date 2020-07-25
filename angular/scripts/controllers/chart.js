@@ -3,73 +3,7 @@ import gql from 'graphql-tag';
 import moment from 'moment';
 
 
-function syncToLocalStorage(key,varr,vm,$localStorage){
 
-    // save settings to local storage
-    if ( angular.isDefined($localStorage[key]) ) {
-      vm[varr] = $localStorage[key];
-      console.log("areas",vm[varr])
-    } else {
-      $localStorage[key] = vm[varr];
-    }
-}
-
-function refreshStats(vm,apollo){
-    var sellstats_args={
-    }
-
-
-    if (vm.filters.areas.length != 0) {
-      sellstats_args._areas = vm.filters.areas.join('|')
-    }
-    // $interval(function () {
-    apollo.query({
-        query: gql`
-                  query MyQuery($_today: date,$_sellstats_args: sellstats_args!) {
-                    transaction: transactions_aggregate {
-                      aggregate {
-                        count(columns: categories_applied)
-                      }
-                    }
-                    parking: parkings_aggregate {
-                      aggregate {
-                        count(columns: id)
-                      }
-                    }
-                    payment: payments_aggregate(where: {created_at: {_eq: $_today}}) {
-                      aggregate {
-                        sum {
-                          amount: amount_paid
-                        }
-                      }
-                    }
-                    sellstats(args:$_sellstats_args) {
-                      amount
-                      duration
-                      transactionDate
-                    }
-                    parkings {
-                      name: area_name
-                    }
-                  }
-                `,
-        variables:{
-          "_today": moment().format("YYYY-MM-DD"),
-          "_sellstats_args":sellstats_args
-        }
-      })
-      .then(result => {
-          console.log('got data', result);
-          vm.transactionToday=result.data.payment.aggregate.sum.amount?result.data.payment.aggregate.sum.amount:0
-          vm.lockedParking=result.data.transaction.aggregate.count
-          vm.unlockedParking=result.data.parking.aggregate.count-vm.lockedParking
-          // console.log()
-          vm.areaOptions=result.data.parkings
-          console.log(vm.areaOptions)
-        });
-    // }, 5000)
-
-}
 
 (function () {
   'use strict';
@@ -77,25 +11,11 @@ function refreshStats(vm,apollo){
     .module('app')
     .controller('ChartCtrl', Chart);
 
-  Chart.$inject = ['$scope', 'apollo', '$interval','$timeout','APP_ENV','$localStorage'];
+  Chart.$inject = ['$scope', 'apollo', '$interval','$timeout','APP_ENV','$localStorage','$q'];
 
-  function Chart($scope, apollo, $interval,$timeout,APP_ENV,$localStorage) {
+  function Chart($scope, apollo, $interval,$timeout,APP_ENV,$localStorage,$q) {
     var vm = $scope;
-
-
-    vm.slider={
-        options: {
-          floor: 1,
-          ceil: 200,
-          noSwitching: true,
-          translate: function(value, sliderId, label) {
-            
-              return value + " hrs"
-    
-          }
-        }
-    }
-
+   
     vm.filters={
       slider:{
         minValue: 1,
@@ -107,29 +27,131 @@ function refreshStats(vm,apollo){
     }
 
     var filters=APP_ENV.NAME+'-filters'
-    syncToLocalStorage(filters,'filters',vm,$localStorage)
+
+
+    vm.transactionToday = 0;
+    vm.unlockedParking = 0;
+    vm.lockedParking = 0;
+    vm.areaOptions=[]
+
+    vm.sliderVisible = false;
+    vm.sellStats=[];
+
+    vm.slider={
+        options: {
+          floor: 1,
+          ceil: 200,
+          noSwitching: true,
+          translate: function(value) {
+            
+              return value + " hrs"
     
-    $scope.$watch('filters', function(){
-      $localStorage[filters] = vm.filters;
-    }, true);
-// slider
+          }
+        }
+    }
 
-    $scope.sliderVisible = false;
+    $scope.$watch("sliderVisible", function(oldValue,newValue){
+      if(!vm.sliderVisible){
+        $localStorage[filters] = vm.filters;
+        console.log("watch loc",$localStorage[filters].areas)
+        console.log("watch vm",vm.filters.areas)
+      }
+      vm.applyFilter()
+    });
+    
+    function syncToLocalStorage(key,varr){
+      return $q(function(resolve, reject) {
+        if ( angular.isDefined($localStorage[key]) ) {
+          vm[varr] = $localStorage[key];
+          console.log(" sunch areas",vm[varr])
+        } else {
+          $localStorage[key] = vm[varr];
+        }
+        resolve()
+      });
+    }
 
-    // vm.slider = {
-    //   minValue: 1,
-    //   maxValue: 200,
-    //   options: {
-    //     floor: 1,
-    //     ceil: 200,
-    //     noSwitching: true,
-    //     translate: function(value, sliderId, label) {
-          
-    //         return value + " hrs"
-  
-    //     }
-    //   }
-    // };
+    function refreshStats(){
+
+      return $q(function(resolve, reject) {
+        var _graphQL_args={
+          _sellstats_args:{
+            _minduration:vm.filters.slider.minValue,
+            _maxduration:vm.filters.slider.maxValue
+          },
+          _today: moment().format("YYYY-MM-DD")
+        }
+
+
+        if (typeof vm.filters.areas!= "undefined" && vm.filters.areas!=null && vm.filters.areas.length != 0) {
+          _graphQL_args._sellstats_args._areas = vm.filters.areas.join('|')
+          _graphQL_args._areas= vm.filters.areas
+        }
+        // $interval(function () {
+
+
+        apollo.query({
+            query: gql`
+                      query MyQuery($_today: date,$_sellstats_args: sellstats_args!,$_areas: [String!]) {
+                        transaction: transactions_aggregate(where: {parking: {area_name: {_in: $_areas}}}){
+                          aggregate {
+                             count(columns: parking_id)
+                          }
+                        }
+                        parking: parkings_aggregate(where: {area_name: {_in: $_areas}}) {
+                          aggregate {
+                            count(columns: id)
+                          }
+                        }
+                        payment: payments_aggregate(where: {created_at: {_eq: $_today}, completed_transactions: {parking: {area_name: {_in: $_areas}}}}){
+                          aggregate {
+                            sum {
+                              amount: amount_paid
+                            }
+                          }
+                        }
+                        sellstats(args:$_sellstats_args) {
+                          amount
+                          duration
+                          transactionDate
+                        }
+                        parkings(distinct_on: area_name) {
+                          name: area_name
+                        }
+                      }
+                    `,
+            variables:_graphQL_args
+          })
+          .then(result => {
+              console.log('got data', result.data);
+              vm.transactionToday=result.data.payment.aggregate.sum.amount?result.data.payment.aggregate.sum.amount:0
+              vm.lockedParking=result.data.transaction.aggregate.count
+              vm.unlockedParking=result.data.parking.aggregate.count-vm.lockedParking
+              // console.log()
+              vm.areaOptions=result.data.parkings;
+              vm.sellStats=result.data.sellstats;
+              console.log(vm.areaOptions)
+              resolve()
+            });
+        // }, 5000)
+      });
+    }
+
+
+
+
+
+
+
+    
+    var promiseSyncLocalStorage= syncToLocalStorage(filters,'filters')
+    
+
+    // slider
+
+
+
+
     $scope.toggleSlider = function () {
       // console.log("slider")
       $scope.sliderVisible = !$scope.sliderVisible;
@@ -138,96 +160,135 @@ function refreshStats(vm,apollo){
       });
     };
 
-  // location filter
-    // var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
-    //                   '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
-
-    // vm.areas=[];
-    // var areas = APP_ENV.APP_NAME+'-areas';
-    // // save settings to local storage
-    // if ( angular.isDefined($localStorage[areas]) ) {
-    //   vm.areas = $localStorage[areas];
-    //   // console.log("areas",vm.areas)
-    // } else {
-    //   $localStorage[areas] = vm.areas;
-    // }
-
-    // vm.areas=[]
-    // var areas = APP_ENV.APP_NAME+'-areas';
-    // syncToLocalStorage(areas,'areas',vm,$localStorage)
-    // watch changes
-    // $scope.$watch('areas', function(){
-    //   $localStorage[areas] = vm.areas;
-    // }, true);
-
-    vm.transactionToday = 0;
-    vm.unlockedParking = 0;
-    vm.lockedParking = 0;
-    vm.areaOptions=[]
 
 
-    refreshStats(vm,apollo)
 
-    console.log("areas_c",vm.filters)
+    var promiseRefreshStats=refreshStats()
 
+    var chart;
 
-    $('#select-to').selectize({
-        plugins: ['remove_button'],
-        persist: false,
-        maxItems: null,
-        valueField: 'name',
-        labelField: 'name',
-        searchField: ['name'],
-        placeholder:"Enter Area name one by one",
-        items:   vm.filters.areas,
-        options: vm.areaOptions,
-        render: {
-            item: function(item, escape) {
-                return '<div>' +
-                    (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '')+
-                '</div>';
-            },
-            option: function(item, escape) {
-                var label = item.name;
-                return '<div>' +
-                    '<span class="label">' + escape(label) + '</span>' +
-                '</div>';
-            }
-        },
-        createFilter: function(input) {
-            var match, regex;
-
-            // email@address.com
-            regex = new RegExp('^' + input + '$', 'i');
-            match = input.match(regex);
-            if (match) return !this.options.hasOwnProperty(match[0]);
-
-            // name <email@address.com>
-            // regex = new RegExp('^([^<]*)\<' + REGEX_EMAIL + '\>$', 'i');
-            // match = input.match(regex);
-            // if (match) return !this.options.hasOwnProperty(match[2]);
-
-            return false;
-        },
-        onChange: function(value){
-          // $localStorage[areas] = value;
-          console.log("value",value)
-          vm.filters.areas=value;
-          // $localStorage[filters]=vm.filters
-          console.log(vm.filters)
-          console.log("vm areas",vm.filters.areas)
-          console.log("st areas",$localStorage[filters])
-              // var filters=APP_ENV.NAME+'-filters'
-          syncToLocalStorage(filters,'filters',vm,$localStorage)
-        },
-        preload:"focus",
-        load: function(query, callback){
-          callback(vm.areaOptions)
-        }
-    });
-  // end location filter
+    promiseSyncLocalStorage.then(function(){
+      promiseRefreshStats.then(function(){
+          console.log("promise",vm.filters.areas,vm.areaOptions)
+          $('#select-to').selectize({
+                plugins: ['remove_button'],
+                persist: false,
+                maxItems: null,
+                valueField: 'name',
+                labelField: 'name',
+                searchField: ['name'],
+                placeholder:"Enter Area name one by one",
+                items:   vm.filters.areas,
+                options: vm.areaOptions,
+                render: {
+                    item: function(item, escape) {
+                        return '<div>' +
+                            (item.name ? '<span class="name">' + escape(item.name) + '</span>' : '')+
+                        '</div>';
+                    },
+                    option: function(item, escape) {
+                        var label = item.name;
+                        return '<div>' +
+                            '<span class="label">' + escape(label) + '</span>' +
+                        '</div>';
+                    }
+                },
+                createFilter: function(input) {
+                    var match, regex;
+                    regex = new RegExp('^' + input + '$', 'i');
+                    match = input.match(regex);
+                    if (match) return !this.options.hasOwnProperty(match[0]);
 
 
+                    return false;
+                },
+                onChange: function(value){
+                  if(value==null)
+                    value=[]
+                  console.log("slider",value)
+                  vm.filters.areas=value;
+
+                },
+                preload:"focus",
+                load: function(query, callback){
+                  callback(vm.areaOptions)
+                }
+            });
+
+
+
+            // #### sells statistics chart
+            am4core.ready(function() {
+
+              // Themes begin
+              am4core.useTheme(am4themes_animated);
+              // Themes end
+
+              // Create chart instance
+              chart = am4core.create("chartSellStats", am4charts.XYChart);
+              // chart.chartContainer.wheelable = true;
+
+              // Add data
+              chart.data = generateChartData();
+
+              // Create axes
+              var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+              dateAxis.renderer.minGridDistance = 50;
+              dateAxis.baseInterval={ timeUnit: "day", count: 1 };
+              var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+              // Create series
+              var series = chart.series.push(new am4charts.LineSeries());
+              series.dataFields.valueY = "sells";
+              series.dataFields.dateX = "date";
+              series.strokeWidth = 2;
+              series.minBulletDistance = 10;
+              series.tooltipText = `{valueY} RM
+              Duration:{duration}`;
+              series.tooltip.pointerOrientation = "vertical";
+              series.tooltip.background.cornerRadius = 20;
+              series.tooltip.background.fillOpacity = 0.5;
+              series.tooltip.label.padding(12,12,12,12)
+
+              // Add scrollbar
+              chart.scrollbarX = new am4charts.XYChartScrollbar();
+              chart.scrollbarX.series.push(series);
+
+              // Add cursor
+              chart.cursor = new am4charts.XYCursor();
+              chart.cursor.xAxis = dateAxis;
+              chart.cursor.snapToSeries = series;
+
+              function generateChartData() {
+                  console.log("am4",vm.sellStats)
+                  var chartData = [];
+
+                  vm.sellStats.forEach(
+                    function(row){
+                      chartData.push({
+                        date:new Date(row.transactionDate),
+                        sells:row.amount,
+                        duration:row.duration
+                      })
+                    }
+                  )
+                  return chartData;
+              }
+
+            }); 
+
+
+
+      })
+    })
+
+    vm.applyFilter=function(){
+      console.log("applying filter")
+      refreshStats().then(function(){
+        chart.validateData()
+        console.log("data validated")
+      })
+    }
 
     vm.p_p_1 = [{ data: 70, label: 'Server' }, { data: 30, label: 'Client' }];
     vm.p_p_2 = [{ data: 75, label: 'iPhone' }, { data: 20, label: 'iPad' }];
@@ -284,75 +345,6 @@ function refreshStats(vm,apollo){
 
 
 
-
-  vm.locations="Gombak,Ampang Park"
-  vm.minDuration=1
-  vm.maxDuration=3
-
-  // #### sells statistics chart
-    am4core.ready(function() {
-
-      // Themes begin
-      am4core.useTheme(am4themes_animated);
-      // Themes end
-
-      // Create chart instance
-      var chart = am4core.create("chartSellStats", am4charts.XYChart);
-      // chart.chartContainer.wheelable = true;
-
-      // Add data
-      chart.data = generateChartData();
-
-      // Create axes
-      var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-      dateAxis.renderer.minGridDistance = 50;
-
-      var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-
-      // Create series
-      var series = chart.series.push(new am4charts.LineSeries());
-      series.dataFields.valueY = "visits";
-      series.dataFields.dateX = "date";
-      series.strokeWidth = 2;
-      series.minBulletDistance = 10;
-      series.tooltipText = "{valueY}";
-      series.tooltip.pointerOrientation = "vertical";
-      series.tooltip.background.cornerRadius = 20;
-      series.tooltip.background.fillOpacity = 0.5;
-      series.tooltip.label.padding(12,12,12,12)
-
-      // Add scrollbar
-      chart.scrollbarX = new am4charts.XYChartScrollbar();
-      chart.scrollbarX.series.push(series);
-
-      // Add cursor
-      chart.cursor = new am4charts.XYCursor();
-      chart.cursor.xAxis = dateAxis;
-      chart.cursor.snapToSeries = series;
-
-      function generateChartData() {
-          var chartData = [];
-          var firstDate = new Date();
-          firstDate.setDate(firstDate.getDate() - 1000);
-          var visits = 1200;
-          for (var i = 0; i < 500; i++) {
-              // we create date objects here. In your data, you can have date strings
-              // and then set format of your dates using chart.dataDateFormat property,
-              // however when possible, use date objects, as this will speed up chart rendering.
-              var newDate = new Date(firstDate);
-              newDate.setDate(newDate.getDate() + i);
-              
-              visits += Math.round((Math.random()<0.5?1:-1)*Math.random()*10);
-
-              chartData.push({
-                  date: newDate,
-                  visits: visits
-              });
-          }
-          return chartData;
-      }
-
-    }); 
 
 
   }

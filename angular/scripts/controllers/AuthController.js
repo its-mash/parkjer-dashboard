@@ -8,9 +8,9 @@
 
         function AuthController($scope,$rootScope,AUTH_EVENTS,AuthService,$state) {
             var vm = this;
-
+            vm.isProcessing=false;
             vm.login = function() {
-
+                vm.isProcessing=true;
                 var credentials = {
                     email: vm.email,
                     password: vm.password
