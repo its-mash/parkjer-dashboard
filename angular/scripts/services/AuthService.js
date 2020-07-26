@@ -48,12 +48,12 @@
                 }
                 var exists=false;
                 var userRoles =  authService.currentUser!=null ?authService.currentUser.roles :  ['guest']
-                console.log('isAUtho',authorizedRoles)
-                console.log('session useroles',userRoles)
+                // console.log('isAUtho',authorizedRoles)
+                // console.log('session useroles',userRoles)
                 userRoles.forEach(role=>{
                     exists=exists || authorizedRoles.indexOf(role) !== -1
                 })
-                console.log("exists",exists)
+                // console.log("exists",exists)
                 return (authService.isAuthenticated() && exists);
             };
 

@@ -14,7 +14,7 @@ import moment from 'moment';
   Chart.$inject = ['$scope', 'apollo', '$interval','$timeout','APP_ENV','$localStorage','$q',"AuthService"];
 
   function Chart($scope, apollo, $interval,$timeout,APP_ENV,$localStorage,$q,AuthService) {
-    console.log("Session",AuthService.getCurrentUser().token)
+    // console.log("Session",AuthService.getCurrentUser().token)
     var vm = $scope;
    
     vm.filters={
@@ -26,6 +26,8 @@ import moment from 'moment';
 
       ]
     }
+
+
 
     var filters=APP_ENV.NAME+'-filters'
 
@@ -55,7 +57,7 @@ import moment from 'moment';
       if(!vm.sliderVisible){
         $localStorage[filters] = vm.filters;
         // console.log("watch loc",$localStorage[filters].areas)
-        console.log("watch vm",vm.filters)
+        // console.log("watch vm",vm.filters)
         vm.applyFilter()
       }
     });
@@ -72,7 +74,7 @@ import moment from 'moment';
       });
     }
 
-    function refreshStats(){
+    function refreshStats(firstLoad){
 
       return $q(function(resolve, reject) {
         var _graphQL_args={
@@ -119,6 +121,10 @@ import moment from 'moment';
                         parkings(distinct_on: area_name) {
                           name: area_name
                         }
+                        completed_transactions(limit: 1) {
+                          max_duration_a_day
+                          min_duration_a_day
+                        }
                       }
                     `,
             variables:_graphQL_args,
@@ -129,13 +135,22 @@ import moment from 'moment';
             }
           })
           .then(result => {
-              console.log('got data', result.data);
+              // console.log('got data', result.data);
               vm.transactionToday=result.data.payment.aggregate.sum.amount?result.data.payment.aggregate.sum.amount:0
               vm.lockedParking=result.data.transaction.aggregate.count
               vm.unlockedParking=result.data.parking.aggregate.count-vm.lockedParking
               // console.log()
               vm.areaOptions=result.data.parkings;
               vm.sellStats=result.data.sellstats;
+              
+              if(firstLoad){
+                vm.filters.slider.minValue=result.data.completed_transactions[0].min_duration_a_day
+                vm.slider.options.floor=result.data.completed_transactions[0].min_duration_a_day
+                
+                vm.filters.slider.maxValue=result.data.completed_transactions[0].max_duration_a_day
+                vm.slider.options.ceil=result.data.completed_transactions[0].max_duration_a_day
+              }
+
               // console.log(vm.areaOptions)
               resolve()
             });
@@ -169,13 +184,13 @@ import moment from 'moment';
 
 
 
-    var promiseRefreshStats=refreshStats()
+    var promiseRefreshStats=refreshStats(true)
 
     var chart;
 
     promiseSyncLocalStorage.then(function(){
       promiseRefreshStats.then(function(){
-          console.log("promise",vm.filters.areas,vm.areaOptions)
+          // console.log("promise",vm.filters.areas,vm.areaOptions)
           $('#select-to').selectize({
                 plugins: ['remove_button'],
                 persist: false,
@@ -295,8 +310,8 @@ import moment from 'moment';
 
     vm.applyFilter=function(){
       console.log("applying filter")
-      refreshStats().then(function(){
-        console.log("vm data",vm.sellStats)
+      refreshStats(false).then(function(){
+        // console.log("vm data",vm.sellStats)
         // chart.dataLoader.loadData()
         chart.invalidateData()
         // chart.validateData()
